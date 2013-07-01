@@ -25,29 +25,13 @@
 (function ($) {
 
     "use strict";
-
+    
     $.fn.gantt = function (options) {
 
         var cookieKey = "jquery.fn.gantt";
         var scales = ["hours", "days", "weeks", "months"];
-        //Default settings
-        var settings = {
-            source: null,
-            itemsPerPage: 7,
-            months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
-            dow: ["S", "M", "T", "W", "T", "F", "S"],
-            startPos: new Date(),
-            navigate: "buttons",
-            scale: "days",
-            useCookie: false,
-            maxScale: "months",
-            minScale: "hours",
-            waitText: "Please wait...",
-            onItemClick: function (data) { return; },
-            onAddClick: function (data) { return; },
-            onRender: function() { return; },
-            scrollToToday: true
-        };
+        
+        var settings = $.extend({}, $.fn.gantt.defaults, options);
 
         // custom selector `:findday` used to match on specified day in ms.
         //
@@ -1666,12 +1650,6 @@
 
 
         this.each(function () {
-            /**
-            * Extend options with default values
-            */
-            if (options) {
-                $.extend(settings, options);
-            }
 
             this.data = null;        // Received data
             this.pageNum = 0;        // Current page number
@@ -1721,6 +1699,26 @@
         });
 
     };
+    
+    //Default settings
+    $.fn.gantt.defaults = {
+        source: null,
+        itemsPerPage: 7,
+        months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+        dow: ["S", "M", "T", "W", "T", "F", "S"],
+        startPos: new Date(),
+        navigate: "buttons",
+        scale: "days",
+        useCookie: false,
+        maxScale: "months",
+        minScale: "hours",
+        waitText: "Please wait...",
+        onItemClick: function (data) { return; },
+        onAddClick: function (data) { return; },
+        onRender: function() { return; },
+        scrollToToday: true
+    };
+    
 })(jQuery);
 
 function ktkGetNextDate(currentDate, scaleStep) {
