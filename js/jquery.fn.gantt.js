@@ -446,10 +446,10 @@
             var dowClass = [" sn", " wd", " wd", " wd", " wd", " wd", " sa"];
             var gridDowClass = [" sn", "", "", "", "", "", " sa"];
 
-            var yearArr = ['<div class="row"/>'];
+            var yearArr = [];
             var daysInYear = 0;
 
-            var monthArr = ['<div class="row"/>'];
+            var monthArr = [];
             var daysInMonth = 0;
 
             var dayArr = [];
@@ -577,19 +577,20 @@
 
 
                     // Append panel elements
-                    dataPanel.append(yearArr.join(""));
-                    dataPanel.append(monthArr.join(""));
-                    dataPanel.append($('<div class="row"/>').html(dayArr.join("")));
-                    dataPanel.append($('<div class="row"/>').html(dowArr.join("")));
-                    dataPanel.append($('<div class="row"/>').html(horArr.join("")));
+                    var header = $('<div class="header" />').appendTo(dataPanel);
+                    header.append(yearArr.join(""));
+                    header.append(monthArr.join(""));
+                    header.append($('<div class="row"/>').html(dayArr.join("")));
+                    header.append($('<div class="row"/>').html(dowArr.join("")));
+                    header.append($('<div class="row"/>').html(horArr.join("")));
 
                     break;
 
                 // **Weeks**
                 case "weeks":
                     range = tools.parseWeeksRange(gantt.dateStart, gantt.dateEnd);
-                    yearArr = ['<div class="row"/>'];
-                    monthArr = ['<div class="row"/>'];
+                    yearArr = [];
+                    monthArr = [];
                     var year = range[0].getFullYear();
                     var month = range[0].getMonth();
                     var day = range[0];
@@ -645,9 +646,9 @@
                         + '</div></div>');
 
                     var dataPanel = this.dataPanel(gantt, range.length * tools.getCellSize());
-
-                    dataPanel.append(yearArr.join("") + monthArr.join("") + dayArr.join("") + (dowArr.join("")));
-
+                    var header = $('<div class="header" />').appendTo(dataPanel);
+                    header.append(yearArr.join("") + monthArr.join("") + dayArr.join("") + (dowArr.join("")));
+                    
                     break;
 
                 // **Months**
@@ -692,12 +693,12 @@
                         + '</div></div>');
 
                     var dataPanel = this.dataPanel(gantt, range.length * tools.getCellSize());
-
+                    var header = $('<div class="header" />').appendTo(dataPanel);
                     // Append panel elements
-                    dataPanel.append(yearArr.join(""));
-                    dataPanel.append(monthArr.join(""));
-                    dataPanel.append($('<div class="row"/>').html(dayArr.join("")));
-                    dataPanel.append($('<div class="row"/>').html(dowArr.join("")));
+                    header.append(yearArr.join(""));
+                    header.append(monthArr.join(""));
+                    header.append($('<div class="row"/>').html(dayArr.join("")));
+                    header.append($('<div class="row"/>').html(dowArr.join("")));
 
                     break;
 
@@ -768,14 +769,14 @@
                         + '</div></div>');
 
                     var dataPanel = this.dataPanel(gantt, range.length * tools.getCellSize());
-
+                    var header = $('<div class="header" />').appendTo(dataPanel);
 
                     // Append panel elements
 
-                    dataPanel.append(yearArr.join(""));
-                    dataPanel.append(monthArr.join(""));
-                    dataPanel.append($('<div class="row"/>').html(dayArr.join("")));
-                    dataPanel.append($('<div class="row"/>').html(dowArr.join("")));
+                    header.append(yearArr.join(""));
+                    header.append(monthArr.join(""));
+                    header.append($('<div class="row"/>').html(dayArr.join("")));
+                    header.append($('<div class="row"/>').html(dowArr.join("")));
 
                     break;
             }
@@ -1022,6 +1023,9 @@
         // **Fill the Chart**
         // Parse the data and fill the data panel
         Gantt.prototype.fillData = function (gantt, datapanel, leftpanel) {
+            
+            datapanel = $('<div class="content" />').appendTo(datapanel);
+            
             var invertColor = function (colStr) {
                 try {
                     colStr = colStr.replace("rgb(", "").replace(")", "");
@@ -1066,7 +1070,7 @@
                                 var topEl = gantt.$element.find("#rowheader" + i);
 
                                 var top = tools.getCellSize() * 5 + 2 + parseInt(topEl.attr("offset"), 10);
-                                _bar.css({ 'margin-top': top, 'margin-left': Math.floor(cFrom) });
+                                _bar.css({ 'margin-left': Math.floor(cFrom) });
 
                                 datapanel.append(_bar);
                                 break;
@@ -1109,7 +1113,7 @@
                                 var topEl = gantt.$element.find("#rowheader" + i);
 
                                 var top = tools.getCellSize() * 3 + 2 + parseInt(topEl.attr("offset"), 10);
-                                _bar.css({ 'margin-top': top, 'margin-left': Math.floor(cFrom) });
+                                _bar.css({ 'margin-left': Math.floor(cFrom) });
 
                                 datapanel.append(_bar);
                                 break;
@@ -1149,7 +1153,7 @@
                                 var topEl = gantt.$element.find("#rowheader" + i);
 
                                 var top = tools.getCellSize() * 2 + 2 + parseInt(topEl.attr("offset"), 10);
-                                _bar.css({ 'margin-top': top, 'margin-left': Math.floor(cFrom) });
+                                _bar.css({ 'margin-left': Math.floor(cFrom) });
 
                                 datapanel.append(_bar);
                                 break;
@@ -1175,7 +1179,7 @@
                                 var topEl = gantt.$element.find("#rowheader" + i);
 
                                 var top = tools.getCellSize() * 4 + 2 + parseInt(topEl.attr("offset"), 10);
-                                _bar.css({ 'margin-top': top, 'margin-left': Math.floor(cFrom) });
+                                _bar.css({ 'margin-left': Math.floor(cFrom) });
 
                                 datapanel.append(_bar);
 

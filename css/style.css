@@ -43,7 +43,8 @@
 }
 
 .fn-gantt .row {
-    float: left;
+    display: inline-block;
+    vertical-align: top;
     height: 24px;
     line-height: 24px;
     margin-left: -24px;
@@ -151,7 +152,6 @@
 }
 
 .fn-gantt .rightPanel .month, .fn-gantt .rightPanel .year {
-    float: left;
     overflow: hidden;
     border-left: 1px solid #DDD;
     border-bottom: 1px solid #DDD;
@@ -180,8 +180,7 @@
 .fn-gantt .bar {
     background-color: #D0E4FD;
     height: 18px;
-    margin: 4px 3px 3px 3px;
-    position: absolute;
+    margin: 6px 3px 3px 3px;
     z-index: 10;
     text-align: center;
         -webkit-box-shadow: 0 0 1px rgba(0,0,0,0.25) inset;
@@ -190,6 +189,10 @@
             -webkit-border-radius: 3px;
             -moz-border-radius: 3px;
             border-radius: 3px;
+}
+
+.fn-gantt .bar:first-child {
+    margin-top: 2px;
 }
 
 .fn-gantt .bar .fn-label {
