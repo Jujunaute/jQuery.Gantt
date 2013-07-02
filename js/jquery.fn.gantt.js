@@ -381,14 +381,6 @@
         Gantt.prototype.dataPanel = function (gantt, width) {
             var dataPanel = $('<div class="dataPanel" style="width: ' + width + 'px;"/>');
 
-            // Handle mousewheel events for scrolling the data panel
-            var mousewheelevt = (/Firefox/i.test(navigator.userAgent)) ? "DOMMouseScroll" : "mousewheel";
-            if (document.attachEvent) {
-                gantt.element.attachEvent("on" + mousewheelevt, function (e) { gantt.wheelScroll(gantt, e); });
-            } else if (document.addEventListener) {
-                gantt.element.addEventListener(mousewheelevt, function (e) { gantt.wheelScroll(gantt, e); }, false);
-            }
-
             // Handle click events and dispatch to registered `onAddClick`
             // function
             dataPanel.click(function (e) {
@@ -799,178 +791,66 @@
         Gantt.prototype.navigation = function (gantt) {
             var ganttNavigate = null;
 
-            // Scrolling navigation is provided by setting
-            // `settings.navigate='scroll'`
-            if (settings.navigate === "scroll") {
-                ganttNavigate = $('<div class="navigate" />')
-                    .append($('<div class="nav-slider" />')
-                        .append($('<div class="nav-slider-left" />')
-                            .append($('<span role="button" class="nav-link nav-page-back"/>')
-                                .html('&lt;')
-                                .click(function () {
-                                    gantt.navigatePage(gantt, -1);
-                                }))
-                            .append($('<div class="page-number"/>')
-                                    .append($('<span/>')
-                                        .html(gantt.pageNum + 1 + ' of ' + gantt.pageCount)))
-                            .append($('<span role="button" class="nav-link nav-page-next"/>')
-                                .html('&gt;')
-                                .click(function () {
-                                    gantt.navigatePage(gantt, 1);
-                                }))
-                            .append($('<span role="button" class="nav-link nav-now"/>')
-                                .html('&#9679;')
-                                .click(function () {
-                                    gantt.navigateTo(gantt, 'now');
-                                }))
-                            .append($('<span role="button" class="nav-link nav-prev-week"/>')
-                                .html('&lt;&lt;')
-                                .click(function () {
-                                    if (settings.scale === 'hours') {
-                                        gantt.navigateTo(gantt, tools.getCellSize() * 8);
-                                    } else if (settings.scale === 'days') {
-                                        gantt.navigateTo(gantt, tools.getCellSize() * 30);
-                                    } else if (settings.scale === 'weeks') {
-                                        gantt.navigateTo(gantt, tools.getCellSize() * 12);
-                                    } else if (settings.scale === 'months') {
-                                        gantt.navigateTo(gantt, tools.getCellSize() * 6);
-                                    }
-                                }))
-                            .append($('<span role="button" class="nav-link nav-prev-day"/>')
-                                .html('&lt;')
-                                .click(function () {
-                                    if (settings.scale === 'hours') {
-                                        gantt.navigateTo(gantt, tools.getCellSize() * 4);
-                                    } else if (settings.scale === 'days') {
-                                        gantt.navigateTo(gantt, tools.getCellSize() * 7);
-                                    } else if (settings.scale === 'weeks') {
-                                        gantt.navigateTo(gantt, tools.getCellSize() * 4);
-                                    } else if (settings.scale === 'months') {
-                                        gantt.navigateTo(gantt, tools.getCellSize() * 3);
-                                    }
-                                })))
-                        .append($('<div class="nav-slider-content" />')
-                                .append($('<div class="nav-slider-bar" />')
-                                        .append($('<a class="nav-slider-button" />')
-                                            )
-                                            .mousedown(function (e) {
-                                                if (e.preventDefault) {
-                                                    e.preventDefault();
-                                                }
-                                                gantt.scrollNavigation.scrollerMouseDown = true;
-                                                gantt.sliderScroll(gantt, e);
-                                            })
-                                            .mousemove(function (e) {
-                                                if (gantt.scrollNavigation.scrollerMouseDown) {
-                                                    gantt.sliderScroll(gantt, e);
-                                                }
-                                            })
-                                        )
-                                    )
-                        .append($('<div class="nav-slider-right" />')
-                            .append($('<span role="button" class="nav-link nav-next-day"/>')
-                                .html('&gt;')
-                                .click(function () {
-                                    if (settings.scale === 'hours') {
-                                        gantt.navigateTo(gantt, tools.getCellSize() * -4);
-                                    } else if (settings.scale === 'days') {
-                                        gantt.navigateTo(gantt, tools.getCellSize() * -7);
-                                    } else if (settings.scale === 'weeks') {
-                                        gantt.navigateTo(gantt, tools.getCellSize() * -4);
-                                    } else if (settings.scale === 'months') {
-                                        gantt.navigateTo(gantt, tools.getCellSize() * -3);
-                                    }
-                                }))
-                        .append($('<span role="button" class="nav-link nav-next-week"/>')
-                                .html('&gt;&gt;')
-                                .click(function () {
-                                    if (settings.scale === 'hours') {
-                                        gantt.navigateTo(gantt, tools.getCellSize() * -8);
-                                    } else if (settings.scale === 'days') {
-                                        gantt.navigateTo(gantt, tools.getCellSize() * -30);
-                                    } else if (settings.scale === 'weeks') {
-                                        gantt.navigateTo(gantt, tools.getCellSize() * -12);
-                                    } else if (settings.scale === 'months') {
-                                        gantt.navigateTo(gantt, tools.getCellSize() * -6);
-                                    }
-                                }))
-                            .append($('<span role="button" class="nav-link nav-zoomIn"/>')
-                                .html('&#43;')
-                                .click(function () {
-                                    gantt.zoomInOut(gantt, -1);
-                                }))
-                            .append($('<span role="button" class="nav-link nav-zoomOut"/>')
-                                .html('&#45;')
-                                .click(function () {
-                                    gantt.zoomInOut(gantt, 1);
-                                }))
-                                )
-                            );
-                $(document).mouseup(function () {
-                    gantt.scrollNavigation.scrollerMouseDown = false;
-                });
-            // Button navigation is provided by setting `settings.navigation='buttons'`
-            } else {
-                ganttNavigate = $('<div class="navigate" />')
-                    .append($('<span role="button" class="nav-link nav-page-back"/>')
-                        .html('&lt;')
-                        .click(function () {
-                            gantt.navigatePage(gantt, -1);
-                        }))
-                    .append($('<div class="page-number"/>')
-                            .append($('<span/>')
-                                .html(gantt.pageNum + 1 + ' of ' + gantt.pageCount)))
-                    .append($('<span role="button" class="nav-link nav-page-next"/>')
-                        .html('&gt;')
-                        .click(function () {
-                            gantt.navigatePage(gantt, 1);
-                        }))
-                    .append($('<span role="button" class="nav-link nav-begin"/>')
-                        .html('&#124;&lt;')
-                        .click(function () {
-                            gantt.navigateTo(gantt, 'begin');
-                        }))
-                    .append($('<span role="button" class="nav-link nav-prev-week"/>')
-                        .html('&lt;&lt;')
-                        .click(function () {
-                            gantt.navigateTo(gantt, tools.getCellSize() * 7);
-                        }))
-                    .append($('<span role="button" class="nav-link nav-prev-day"/>')
-                        .html('&lt;')
-                        .click(function () {
-                            gantt.navigateTo(gantt, tools.getCellSize());
-                        }))
-                    .append($('<span role="button" class="nav-link nav-now"/>')
-                        .html('&#9679;')
-                        .click(function () {
-                            gantt.navigateTo(gantt, 'now');
-                        }))
-                    .append($('<span role="button" class="nav-link nav-next-day"/>')
-                        .html('&gt;')
-                        .click(function () {
-                            gantt.navigateTo(gantt, tools.getCellSize() * -1);
-                        }))
-                    .append($('<span role="button" class="nav-link nav-next-week"/>')
-                        .html('&gt;&gt;')
-                        .click(function () {
-                            gantt.navigateTo(gantt, tools.getCellSize() * -7);
-                        }))
-                    .append($('<span role="button" class="nav-link nav-end"/>')
-                        .html('&gt;&#124;')
-                        .click(function () {
-                            gantt.navigateTo(gantt, 'end');
-                        }))
-                    .append($('<span role="button" class="nav-link nav-zoomIn"/>')
-                        .html('&#43;')
-                        .click(function () {
-                            gantt.zoomInOut(gantt, -1);
-                        }))
-                    .append($('<span role="button" class="nav-link nav-zoomOut"/>')
-                        .html('&#45;')
-                        .click(function () {
-                            gantt.zoomInOut(gantt, 1);
-                        }));
-            }
+            ganttNavigate = $('<div class="navigate" />')
+                .append($('<span role="button" class="nav-link nav-page-back"/>')
+                    .html('&lt;')
+                    .click(function () {
+                        gantt.navigatePage(gantt, -1);
+                    }))
+                .append($('<div class="page-number"/>')
+                        .append($('<span/>')
+                            .html(gantt.pageNum + 1 + ' of ' + gantt.pageCount)))
+                .append($('<span role="button" class="nav-link nav-page-next"/>')
+                    .html('&gt;')
+                    .click(function () {
+                        gantt.navigatePage(gantt, 1);
+                    }))
+                .append($('<span role="button" class="nav-link nav-begin"/>')
+                    .html('&#124;&lt;')
+                    .click(function () {
+                        gantt.navigateTo(gantt, 'begin');
+                    }))
+                .append($('<span role="button" class="nav-link nav-prev-week"/>')
+                    .html('&lt;&lt;')
+                    .click(function () {
+                        gantt.navigateTo(gantt, tools.getCellSize() * -7);
+                    }))
+                .append($('<span role="button" class="nav-link nav-prev-day"/>')
+                    .html('&lt;')
+                    .click(function () {
+                        gantt.navigateTo(gantt, tools.getCellSize() * -1);
+                    }))
+                .append($('<span role="button" class="nav-link nav-now"/>')
+                    .html('&#9679;')
+                    .click(function () {
+                        gantt.navigateTo(gantt, 'now');
+                    }))
+                .append($('<span role="button" class="nav-link nav-next-day"/>')
+                    .html('&gt;')
+                    .click(function () {
+                        gantt.navigateTo(gantt, tools.getCellSize() * 1);
+                    }))
+                .append($('<span role="button" class="nav-link nav-next-week"/>')
+                    .html('&gt;&gt;')
+                    .click(function () {
+                        gantt.navigateTo(gantt, tools.getCellSize() * 7);
+                    }))
+                .append($('<span role="button" class="nav-link nav-end"/>')
+                    .html('&gt;&#124;')
+                    .click(function () {
+                        gantt.navigateTo(gantt, 'end');
+                    }))
+                .append($('<span role="button" class="nav-link nav-zoomIn"/>')
+                    .html('&#43;')
+                    .click(function () {
+                        gantt.zoomInOut(gantt, -1);
+                    }))
+                .append($('<span role="button" class="nav-link nav-zoomOut"/>')
+                    .html('&#45;')
+                    .click(function () {
+                        gantt.zoomInOut(gantt, 1);
+                    }));
+            
             return $('<div class="bottom"/>').append(ganttNavigate);
         },
 
@@ -1213,53 +1093,57 @@
         },
         // **Navigation**
         Gantt.prototype.navigateTo = function (gantt, val) {
+            console.log (val);
             var $rightPanel = gantt.$element.find(".fn-gantt .rightPanel");
             var $dataPanel = $rightPanel.find(".dataPanel");
+            var $content = $dataPanel.find(".content");
+            var $header = $dataPanel.find(".header");
             $dataPanel.click = function () {
                 alert(arguments.join(""));
             };
-            var rightPanelWidth = $rightPanel.width();
+            var rightPanelWidth = $content.width();
             var dataPanelWidth = $dataPanel.width();
 
             switch (val) {
                 case "begin":
-                    $dataPanel.animate({
-                        "margin-left": "0px"
-                    }, "fast", function () { this.repositionLabel(gantt); });
+                    $content.animate({
+                        scrollLeft: "0px"
+                    }, "fast", function () { gantt.repositionLabel(gantt); });
                     gantt.scrollNavigation.panelMargin = 0;
                     break;
                 case "end":
                     var mLeft = dataPanelWidth - rightPanelWidth;
-                    gantt.scrollNavigation.panelMargin = mLeft * -1;
-                    $dataPanel.animate({
-                        "margin-left": "-" + mLeft + "px"
-                    }, "fast", function () { this.repositionLabel(gantt); });
+                    gantt.scrollNavigation.panelMargin = mLeft;
+                    $content.animate({
+                        scrollLeft: mLeft + "px"
+                    }, "fast", function () { gantt.repositionLabel(gantt); });
                     break;
                 case "now":
                     if (!gantt.scrollNavigation.canScroll || !$dataPanel.find(".today").length) {
                         return false;
                     }
-                    var max_left = (dataPanelWidth - rightPanelWidth) * -1;
-                    var cur_marg = $dataPanel.css("margin-left").replace("px", "");
+                    var max_left = (dataPanelWidth - rightPanelWidth);
+                    var cur_marg = $content.scrollLeft();
                     var val = $dataPanel.find(".today").offset().left - $dataPanel.offset().left;
-                    val *= -1;
-                    if (val > 0) {
+                    if (val <= 0) {
                         val = 0;
-                    } else if (val < max_left) {
+                    } else if (val > max_left) {
                         val = max_left;
                     }
-                    $dataPanel.animate({
-                        "margin-left": val + "px"
+                    $content.animate({
+                        scrollLeft: val + "px"
                     }, "fast", this.repositionLabel(gantt));
                     gantt.scrollNavigation.panelMargin = val;
                     break;
                 default:
-                    var max_left = (dataPanelWidth - rightPanelWidth) * -1;
-                    var cur_marg = $dataPanel.css("margin-left").replace("px", "");
+                    
+                    var max_left = (dataPanelWidth - rightPanelWidth);
+                    var cur_marg = $content.scrollLeft();
                     var val = parseInt(cur_marg, 10) + val;
-                    if (val <= 0 && val >= max_left) {
-                        $dataPanel.animate({
-                            "margin-left": val + "px"
+                    console.log(dataPanelWidth,rightPanelWidth, val, max_left);
+                    if (val >= 0 && val <= max_left) {
+                        $content.animate({
+                            scrollLeft: val + "px"
                         }, "fast", this.repositionLabel(gantt));
                     }
                     gantt.scrollNavigation.panelMargin = val;
@@ -1335,114 +1219,6 @@
                 }
                 gantt.init(gantt);
             });
-        },
-
-        // Move chart via mouseclick
-        Gantt.prototype.mouseScroll = function (gantt, e) {
-            var $dataPanel = gantt.$element.find(".fn-gantt .dataPanel");
-            $dataPanel.css("cursor", "move");
-            var bPos = $dataPanel.offset();
-            var mPos = gantt.scrollNavigation.mouseX === null ? e.pageX : gantt.scrollNavigation.mouseX;
-            var delta = e.pageX - mPos;
-            gantt.scrollNavigation.mouseX = e.pageX;
-
-            this.scrollPanel(gantt, delta);
-
-            clearTimeout(gantt.scrollNavigation.repositionDelay);
-            gantt.scrollNavigation.repositionDelay = setTimeout(this.repositionLabel, 50, gantt);
-        },
-
-        // Move chart via mousewheel
-        Gantt.prototype.wheelScroll = function (gantt, e) {
-            var delta = e.detail ? e.detail * (-50) : e.wheelDelta / 120 * 50;
-
-            this.scrollPanel(gantt, delta);
-
-            clearTimeout(gantt.scrollNavigation.repositionDelay);
-            gantt.scrollNavigation.repositionDelay = setTimeout(this.repositionLabel, 50, gantt);
-
-            if (e.preventDefault) {
-                e.preventDefault();
-            } else {
-                return false;
-            }
-        },
-
-        // Move chart via slider control
-        Gantt.prototype.sliderScroll = function (gantt, e) {
-            var $sliderBar = gantt.$element.find(".nav-slider-bar");
-            var $sliderBarBtn = $sliderBar.find(".nav-slider-button");
-            var $rightPanel = gantt.$element.find(".fn-gantt .rightPanel");
-            var $dataPanel = $rightPanel.find(".dataPanel");
-
-            var bPos = $sliderBar.offset();
-            var bWidth = $sliderBar.width();
-            var wButton = $sliderBarBtn.width();
-
-            var pos, mLeft;
-
-            if ((e.pageX >= bPos.left) && (e.pageX <= bPos.left + bWidth)) {
-                pos = e.pageX - bPos.left;
-                pos = pos - wButton / 2;
-                $sliderBarBtn.css("left", pos);
-
-                mLeft = $dataPanel.width() - $rightPanel.width();
-
-                var pPos = pos * mLeft / bWidth * -1;
-                if (pPos >= 0) {
-                    $dataPanel.css("margin-left", "0px");
-                    gantt.scrollNavigation.panelMargin = 0;
-                } else if (pos >= bWidth - (wButton * 1)) {
-                    $dataPanel.css("margin-left", mLeft * -1 + "px");
-                    gantt.scrollNavigation.panelMargin = mLeft * -1;
-                } else {
-                    $dataPanel.css("margin-left", pPos + "px");
-                    gantt.scrollNavigation.panelMargin = pPos;
-                }
-                clearTimeout(gantt.scrollNavigation.repositionDelay);
-                gantt.scrollNavigation.repositionDelay = setTimeout(this.repositionLabel, 5, gantt);
-            }
-        },
-
-        // Update scroll panel margins
-        Gantt.prototype.scrollPanel = function (gantt, delta) {
-            if (!gantt.scrollNavigation.canScroll) {
-                return false;
-            }
-            var _panelMargin = parseInt(gantt.scrollNavigation.panelMargin, 10) + delta;
-            if (_panelMargin > 0) {
-                gantt.scrollNavigation.panelMargin = 0;
-                gantt.$element.find(".fn-gantt .dataPanel").css("margin-left", gantt.scrollNavigation.panelMargin + "px");
-            } else if (_panelMargin < gantt.scrollNavigation.panelMaxPos * -1) {
-                gantt.scrollNavigation.panelMargin = gantt.scrollNavigation.panelMaxPos * -1;
-                gantt.$element.find(".fn-gantt .dataPanel").css("margin-left", gantt.scrollNavigation.panelMargin + "px");
-            } else {
-                gantt.scrollNavigation.panelMargin = _panelMargin;
-                gantt.$element.find(".fn-gantt .dataPanel").css("margin-left", gantt.scrollNavigation.panelMargin + "px");
-            }
-            this.synchronizeScroller(gantt);
-        },
-
-        // Synchronize scroller
-        Gantt.prototype.synchronizeScroller = function (gantt) {
-            if (settings.navigate === "scroll") {
-                var $rightPanel = gantt.$element.find(".fn-gantt .rightPanel");
-                var $dataPanel = $rightPanel.find(".dataPanel");
-                var $sliderBar = gantt.$element.find(".nav-slider-bar");
-                var $sliderBtn = $sliderBar.find(".nav-slider-button");
-
-                var bWidth = $sliderBar.width();
-                var wButton = $sliderBtn.width();
-
-                var mLeft = $dataPanel.width() - $rightPanel.width();
-                var hPos = 0;
-                if ($dataPanel.css("margin-left")) {
-                    hPos = $dataPanel.css("margin-left").replace("px", "");
-                }
-                var pos = hPos * bWidth / mLeft - $sliderBtn.width() * 0.25;
-                pos = pos > 0 ? 0 : (pos * -1 >= bWidth - (wButton * 0.75)) ? (bWidth - (wButton * 1.25)) * -1 : pos;
-                $sliderBtn.css("left", pos * -1);
-            }
         },
 
         // Reposition data labels
