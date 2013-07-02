@@ -282,9 +282,20 @@
             gantt.scrollNavigation.panelMaxPos = ($dataPanel.width() - $rightPanel.width());
 
             gantt.scrollNavigation.canScroll = ($dataPanel.width() > $rightPanel.width());
+            
+
+
+
 
             this.markNow(gantt);
             this.fillData(gantt, $dataPanel, $leftPanel);
+
+            var header = $dataPanel.children('.header');
+            $dataPanel.children('.content').scroll(function(e) {
+                $(this).scrollLeft();
+                header.css({marginLeft: $(this).scrollLeft() * -1});
+                //$leftPanel.css({marginTop: $(this).scrollTop() * -1});
+            });
 
             // Set a cookie to record current position in the view
             if (settings.useCookie) {
@@ -334,8 +345,6 @@
                     this.repositionLabel(gantt);
                 }
             }
-
-            $dataPanel.css({ height: $leftPanel.height() });
             this.waitToggle(gantt, false);
             settings.onRender();
         };
@@ -364,6 +373,7 @@
                 }
             });
             ganttLeftPanel.append(entries.join(""));
+            ganttLeftPanel.append('<div class="row" />');
             return ganttLeftPanel;
         };
 
@@ -578,11 +588,11 @@
 
                     // Append panel elements
                     var header = $('<div class="header" />').appendTo(dataPanel);
-                    header.append(yearArr.join(""));
-                    header.append(monthArr.join(""));
-                    header.append($('<div class="row"/>').html(dayArr.join("")));
-                    header.append($('<div class="row"/>').html(dowArr.join("")));
-                    header.append($('<div class="row"/>').html(horArr.join("")));
+                    header.append('<div class="row">' + yearArr.join("") + '</div>');
+                    header.append('<div class="row">' + monthArr.join("") + '</div>');
+                    header.append('<div class="row">' + dayArr.join("") + '</div>');
+                    header.append('<div class="row">' + dowArr.join("") + '</div>');
+                    header.append('<div class="row">' + horArr.join("") + '</div>');
 
                     break;
 
@@ -647,7 +657,9 @@
 
                     var dataPanel = this.dataPanel(gantt, range.length * tools.getCellSize());
                     var header = $('<div class="header" />').appendTo(dataPanel);
-                    header.append(yearArr.join("") + monthArr.join("") + dayArr.join("") + (dowArr.join("")));
+                    header.append('<div class="row">' + yearArr.join("") + '</div>');
+                    header.append('<div class="row">' + monthArr.join("") + '</div>');
+                    header.append('<div class="row">' + dayArr.join("") + '</div>');
                     
                     break;
 
@@ -695,10 +707,9 @@
                     var dataPanel = this.dataPanel(gantt, range.length * tools.getCellSize());
                     var header = $('<div class="header" />').appendTo(dataPanel);
                     // Append panel elements
-                    header.append(yearArr.join(""));
-                    header.append(monthArr.join(""));
-                    header.append($('<div class="row"/>').html(dayArr.join("")));
-                    header.append($('<div class="row"/>').html(dowArr.join("")));
+                    
+                    header.append('<div class="row">' + yearArr.join("") + '</div>');
+                    header.append('<div class="row">' + monthArr.join("") + '</div>');
 
                     break;
 
@@ -747,7 +758,7 @@
                         }
 
                         dayArr.push('<div class="row date ' + day_class + '" '
-                                + ' id="dh-' + tools.genId(rday.getTime()) + '" offset="' + i * tools.getCellSize() + '" repdate="' + rday.genRepDate() + '> '
+                                + ' id="dh-' + tools.genId(rday.getTime()) + '" offset="' + i * tools.getCellSize() + '" repdate="' + rday.genRepDate() + '"> '
                                 + ' <div class="fn-label">' + rday.getDate() + '</div></div>');
                         dowArr.push('<div class="row day ' + day_class + '" '
                                 + ' id="dw-' + tools.genId(rday.getTime()) + '"  repdate="' + rday.genRepDate() + '"> '
@@ -773,11 +784,11 @@
 
                     // Append panel elements
 
-                    header.append(yearArr.join(""));
-                    header.append(monthArr.join(""));
-                    header.append($('<div class="row"/>').html(dayArr.join("")));
-                    header.append($('<div class="row"/>').html(dowArr.join("")));
-
+                    header.append('<div class="row">' + yearArr.join("") + '</div>');
+                    header.append('<div class="row">' + monthArr.join("") + '</div>');
+                    header.append('<div class="row">' + dayArr.join("") + '</div>');
+                    header.append('<div class="row">' + dowArr.join("") + '</div>');
+                    console.log(header.html());
                     break;
             }
 
@@ -1023,8 +1034,11 @@
         // **Fill the Chart**
         // Parse the data and fill the data panel
         Gantt.prototype.fillData = function (gantt, datapanel, leftpanel) {
-            
-            datapanel = $('<div class="content" />').appendTo(datapanel);
+            var rightPanel = datapanel.closest('.rightPanel');
+            var dataPanelWidth = datapanel.width();
+            var contentHeight = datapanel.height() - leftpanel.children('.spacer').height() - tools.getCellSize();
+            datapanel = $('<div class="content" />').width(rightPanel.width()).appendTo(datapanel);
+            datapanel = $('<div class="bars" />').width(dataPanelWidth).appendTo(datapanel);
             
             var invertColor = function (colStr) {
                 try {

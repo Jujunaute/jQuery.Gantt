@@ -47,8 +47,10 @@
     vertical-align: top;
     height: 24px;
     line-height: 24px;
-    margin-left: -24px;
+    margin-left: 0;
 }
+
+
 
 .fn-gantt .leftPanel .fn-label {
     display: inline-block;
@@ -60,15 +62,17 @@
     overflow: hidden;
 }
 
-.fn-gantt .leftPanel .row0 {
-    border-top: 1px solid #DDD;
-}
-.fn-gantt .leftPanel .name, .fn-gantt .leftPanel .desc {
+.fn-gantt .leftPanel .row {
     float: left;
     height: 23px;
+    width: 225px;
     margin: 0;
-    border-bottom: 1px solid #DDD;
+    border-top: 1px solid #DDD;
     background-color: #f6f6f6;
+}
+
+.fn-gantt .row.spacer {
+    border-top-style: none;
 }
 
 .fn-gantt .leftPanel .name {
@@ -99,13 +103,21 @@
     overflow: hidden;
 }
 
+.fn-gantt .dataPanel .content {
+    overflow: auto;
+}
+
 .fn-gantt .dataPanel {
     margin-left: 0px;
     border-right: 1px solid #DDD;
+}
+
+.fn-gantt .dataPanel .bars {
     background-image: url(../img/grid.png);
     background-repeat: repeat;
     background-position: 24px 24px;
 }
+
 .fn-gantt .day, .fn-gantt .date {
     overflow: visible;
     width: 24px;
