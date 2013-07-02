@@ -11,9 +11,6 @@
 //          onItemClick: function(data) {
 //              alert("Item clicked - show some details");
 //          },
-//          onAddClick: function(dt, rowId) {
-//              alert("Empty space clicked - add an item!");
-//          },
 //          onRender: function() {
 //              console.log("chart rendered");
 //          }
@@ -230,21 +227,6 @@
 
         };
         
-        // Return the element whose topmost point lies under the given point
-        // Normalizes for IE
-        Gantt.prototype.elementFromPoint = function (x, y) {
-
-            if ($.browser.msie) {
-                x -= $(document).scrollLeft();
-                y -= $(document).scrollTop();
-            } else {
-                x -= window.pageXOffset;
-                y -= window.pageYOffset;
-            }
-
-            return document.elementFromPoint(x, y);
-        };
-        
         // **Setup the initial view**
         // Here we calculate the number of rows, pages and visible start
         // and end dates once the data is ready
@@ -263,20 +245,17 @@
 
         // **Render the grid**
         Gantt.prototype.render = function (gantt) {
-            var content = $('<div class="fn-content"/>');
-            var $leftPanel = this.leftPanel(gantt);
-            content.append($leftPanel);
-            var $rightPanel = this.rightPanel(gantt, $leftPanel);
+            gantt.$element.empty();
+            gantt.$gantt = $('<div class="fn-gantt" />').appendTo(gantt.$element);
+            var $content = $('<div class="fn-content"/>').appendTo(gantt.$gantt);
+            
+            var $leftPanel = this.leftPanel(gantt, $content);
+            var $rightPanel = this.rightPanel(gantt, $content);
             var mLeft, hPos;
 
-            content.append($rightPanel);
-            content.append(this.navigation(gantt));
+            $content.append(this.navigation(gantt));
 
             var $dataPanel = $rightPanel.find(".dataPanel");
-
-            gantt.$gantt = $('<div class="fn-gantt" />').append(content);
-
-            gantt.$element.html(gantt.$gantt);
 
             gantt.scrollNavigation.panelMargin = parseInt($dataPanel.css("margin-left").replace("px", ""), 10);
             gantt.scrollNavigation.panelMaxPos = ($dataPanel.width() - $rightPanel.width());
@@ -350,9 +329,10 @@
         };
 
         // Create and return the left panel with labels
-        Gantt.prototype.leftPanel = function (gantt) {
+        Gantt.prototype.leftPanel = function (gantt, $content) {
             /* Left panel */
             var ganttLeftPanel = $('<div class="leftPanel"/>')
+                .appendTo($content)
                 .append($('<div class="row spacer"/>')
                 .css("height", tools.getCellSize() * gantt.headerRows + "px")
                 .css("width", "100%"));
@@ -378,69 +358,23 @@
         };
 
         // Create and return the data panel element
-        Gantt.prototype.dataPanel = function (gantt, width) {
-            var dataPanel = $('<div class="dataPanel" style="width: ' + width + 'px;"/>');
+        Gantt.prototype.dataPanel = function (gantt, width, $rightPanel) {
+            var $dataPanel = $('<div class="dataPanel" style="width: ' + width + 'px;"/>').appendTo($rightPanel);
 
             // Handle click events and dispatch to registered `onAddClick`
             // function
-            dataPanel.click(function (e) {
+            var $bars = $('<div class="bars"></div>').width(width);
+            $('<div class="content"></div>')
+                    .append($bars)
+                    .appendTo($dataPanel)
+                    .width($rightPanel.width());
 
-                e.stopPropagation();
-                var corrX, corrY;
-                var leftpanel = gantt.$element.find(".fn-gantt .leftPanel");
-                var datapanel = gantt.$element.find(".fn-gantt .dataPanel");
-                switch (settings.scale) {
-                    case "weeks":
-                        corrY = tools.getCellSize() * 2;
-                        break;
-                    case "months":
-                        corrY = tools.getCellSize();
-                        break;
-                    case "hours":
-                        corrY = tools.getCellSize() * 4;
-                        break;
-                    case "days":
-                        corrY = tools.getCellSize() * 3;
-                        break;
-                    default:
-                        corrY = tools.getCellSize() * 2;
-                        break;
-                }
-
-                /* Adjust, so get middle of elm
-                corrY -= Math.floor(tools.getCellSize() / 2);
-                */
-
-                // Find column where click occurred
-                var col = gantt.elementFromPoint(e.pageX, datapanel.offset().top + corrY);
-                // Was the label clicked directly?
-                if (col.className === "fn-label") {
-                    col = $(col.parentNode);
-                } else {
-                    col = $(col);
-                }
-
-                var dt = col.attr("repdate");
-                // Find row where click occurred
-                var row = gantt.elementFromPoint(leftpanel.offset().left + leftpanel.width() - 10, e.pageY);
-                // Was the lable clicked directly?
-                if (row.className.indexOf("fn-label") === 0) {
-                    row = $(row.parentNode);
-                } else {
-                    row = $(row);
-                }
-                var rowId = row.data().id;
-
-                // Dispatch user registered function with the DateTime in ms
-                // and the id if the clicked object is a row
-                settings.onAddClick(dt, rowId);
-            });
-            return dataPanel;
+            return $dataPanel;
         };
 
         // Creates and return the right panel containing the year/week/day
         // header
-        Gantt.prototype.rightPanel = function (gantt, leftPanel) {
+        Gantt.prototype.rightPanel = function (gantt, $content) {
 
             var range = null;
             // Days of the week have a class of one of
@@ -466,6 +400,8 @@
             var today = new Date();
             today = new Date(today.getFullYear(), today.getMonth(), today.getDate());
             var holidays = settings.holidays ? settings.holidays.join() : '';
+            
+            var $rightPanel = $('<div class="rightPanel"></div>').appendTo($content);
 
             // Setup the headings based on the chosen `settings.scale`
             switch (settings.scale) {
@@ -575,11 +511,11 @@
                             + ' style="width: ' + tools.getCellSize() * hoursInDay + 'px;"> '
                             + ' <div class="fn-label">' + settings.dow[day.getDay()] + '</div></div>');
 
-                    var dataPanel = this.dataPanel(gantt, range.length * tools.getCellSize());
+                    var dataPanel = this.dataPanel(gantt, range.length * tools.getCellSize(), $rightPanel);
 
 
                     // Append panel elements
-                    var header = $('<div class="header" />').appendTo(dataPanel);
+                    var header = $('<div class="header" />').prependTo(dataPanel);
                     header.append('<div class="row">' + yearArr.join("") + '</div>');
                     header.append('<div class="row">' + monthArr.join("") + '</div>');
                     header.append('<div class="row">' + dayArr.join("") + '</div>');
@@ -647,8 +583,8 @@
                         + settings.months[month]
                         + '</div></div>');
 
-                    var dataPanel = this.dataPanel(gantt, range.length * tools.getCellSize());
-                    var header = $('<div class="header" />').appendTo(dataPanel);
+                    var dataPanel = this.dataPanel(gantt, range.length * tools.getCellSize(), $rightPanel);
+                    var header = $('<div class="header" />').prependTo(dataPanel);
                     header.append('<div class="row">' + yearArr.join("") + '</div>');
                     header.append('<div class="row">' + monthArr.join("") + '</div>');
                     header.append('<div class="row">' + dayArr.join("") + '</div>');
@@ -696,8 +632,8 @@
                         + settings.months[month]
                         + '</div></div>');
 
-                    var dataPanel = this.dataPanel(gantt, range.length * tools.getCellSize());
-                    var header = $('<div class="header" />').appendTo(dataPanel);
+                    var dataPanel = this.dataPanel(gantt, range.length * tools.getCellSize(), $rightPanel);
+                    var header = $('<div class="header" />').prependTo(dataPanel);
                     // Append panel elements
                     
                     header.append('<div class="row">' + yearArr.join("") + '</div>');
@@ -771,8 +707,8 @@
                         + settings.months[month]
                         + '</div></div>');
 
-                    var dataPanel = this.dataPanel(gantt, range.length * tools.getCellSize());
-                    var header = $('<div class="header" />').appendTo(dataPanel);
+                    var dataPanel = this.dataPanel(gantt, range.length * tools.getCellSize(), $rightPanel);
+                    var header = $('<div class="header" />').prependTo(dataPanel);
 
                     // Append panel elements
 
@@ -783,7 +719,7 @@
                     break;
             }
 
-            return $('<div class="rightPanel"></div>').append(dataPanel);
+            return $rightPanel;
         };
 
         // **Navigation**
@@ -913,11 +849,7 @@
         // **Fill the Chart**
         // Parse the data and fill the data panel
         Gantt.prototype.fillData = function (gantt, datapanel, leftpanel) {
-            var rightPanel = datapanel.closest('.rightPanel');
-            var dataPanelWidth = datapanel.width();
-            var contentHeight = datapanel.height() - leftpanel.children('.spacer').height() - tools.getCellSize();
-            datapanel = $('<div class="content" />').width(rightPanel.width()).appendTo(datapanel);
-            datapanel = $('<div class="bars" />').width(dataPanelWidth).appendTo(datapanel);
+            datapanel = datapanel.find('.bars');
             
             var invertColor = function (colStr) {
                 try {
@@ -1505,14 +1437,12 @@
         months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
         dow: ["S", "M", "T", "W", "T", "F", "S"],
         startPos: new Date(),
-        navigate: "buttons",
         scale: "days",
         useCookie: false,
         maxScale: "months",
         minScale: "hours",
         waitText: "Please wait...",
         onItemClick: function (data) { return; },
-        onAddClick: function (data) { return; },
         onRender: function() { return; },
         scrollToToday: true
     };
