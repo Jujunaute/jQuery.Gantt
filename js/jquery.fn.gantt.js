@@ -780,7 +780,6 @@
                     header.append('<div class="row">' + monthArr.join("") + '</div>');
                     header.append('<div class="row">' + dayArr.join("") + '</div>');
                     header.append('<div class="row">' + dowArr.join("") + '</div>');
-                    console.log(header.html());
                     break;
             }
 
@@ -1093,7 +1092,6 @@
         },
         // **Navigation**
         Gantt.prototype.navigateTo = function (gantt, val) {
-            console.log (val);
             var $rightPanel = gantt.$element.find(".fn-gantt .rightPanel");
             var $dataPanel = $rightPanel.find(".dataPanel");
             var $content = $dataPanel.find(".content");
@@ -1140,7 +1138,6 @@
                     var max_left = (dataPanelWidth - rightPanelWidth);
                     var cur_marg = $content.scrollLeft();
                     var val = parseInt(cur_marg, 10) + val;
-                    console.log(dataPanelWidth,rightPanelWidth, val, max_left);
                     if (val >= 0 && val <= max_left) {
                         $content.animate({
                             scrollLeft: val + "px"
