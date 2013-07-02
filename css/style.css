@@ -192,9 +192,11 @@
 }
 
 .fn-gantt .bar {
+    position: relative;
+    left: 0;
     background-color: #D0E4FD;
     height: 18px;
-    margin: 6px 3px 3px 3px;
+    margin: 6px 0 0 0;
     z-index: 10;
     text-align: center;
         -webkit-box-shadow: 0 0 1px rgba(0,0,0,0.25) inset;

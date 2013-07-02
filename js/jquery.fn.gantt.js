@@ -798,7 +798,7 @@
             var bar = $('<div class="bar"><div class="fn-label">' + label + '</div></div>')
                     .addClass(cls)
                     .css({
-                        width: ((cellWidth * days) - barMarg) + 5
+                        width: ((cellWidth * days) - barMarg)
                     })
                     .data("dataObj", dataObj);
 
@@ -823,6 +823,8 @@
                 e.stopPropagation();
                 settings.onItemClick($(this).data("dataObj"));
             });
+            
+            bar.draggable({ axis: "x", grid: [cellWidth, cellWidth] });
             return bar;
         },
 
@@ -895,7 +897,7 @@
                                 var topEl = gantt.$element.find("#rowheader" + i);
 
                                 var top = tools.getCellSize() * 5 + 2 + parseInt(topEl.attr("offset"), 10);
-                                _bar.css({ 'margin-left': Math.floor(cFrom) });
+                                _bar.css({ 'left': Math.floor(cFrom) });
 
                                 datapanel.append(_bar);
                                 break;
@@ -938,7 +940,7 @@
                                 var topEl = gantt.$element.find("#rowheader" + i);
 
                                 var top = tools.getCellSize() * 3 + 2 + parseInt(topEl.attr("offset"), 10);
-                                _bar.css({ 'margin-left': Math.floor(cFrom) });
+                                _bar.css({ 'left': Math.floor(cFrom) });
 
                                 datapanel.append(_bar);
                                 break;
@@ -978,7 +980,7 @@
                                 var topEl = gantt.$element.find("#rowheader" + i);
 
                                 var top = tools.getCellSize() * 2 + 2 + parseInt(topEl.attr("offset"), 10);
-                                _bar.css({ 'margin-left': Math.floor(cFrom) });
+                                _bar.css({ 'left': Math.floor(cFrom) });
 
                                 datapanel.append(_bar);
                                 break;
@@ -1004,7 +1006,7 @@
                                 var topEl = gantt.$element.find("#rowheader" + i);
 
                                 var top = tools.getCellSize() * 4 + 2 + parseInt(topEl.attr("offset"), 10);
-                                _bar.css({ 'margin-left': Math.floor(cFrom) });
+                                _bar.css({ 'left': Math.floor(cFrom) });
 
                                 datapanel.append(_bar);
 
